@@ -106,6 +106,6 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
             )
         ));
 
-        $this->setTemplate('module:coinpayments/views/templates/front/payment_execution.tpl');
+        $this->setTemplate('module:coinpayments/views/templates/front/payment_form.tpl');
     }
 }
