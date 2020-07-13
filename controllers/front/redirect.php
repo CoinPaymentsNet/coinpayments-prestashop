@@ -75,6 +75,9 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
             $coin_currency = $api->getCoinCurrency($currency->iso_code);
             $amount = intval(number_format($total, $coin_currency['decimalPlaces'], '', ''));
             $invoice = $api->createInvoice($invoice_id, $coin_currency['id'], $amount, $total);
+            if($api->useWebhooks()){
+                $invoice = array_shift($invoice['invoices']);
+            }
 
         } catch (Exception $e) {
             $error = $e;
