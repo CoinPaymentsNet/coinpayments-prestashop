@@ -50,10 +50,10 @@ class CoinpaymentsNotificationModuleFrontController extends ModuleFrontControlle
 
             $api = $this->module->initCoinApi();
 
-//            if (!$api->checkDataSignature($signature, $content)) {
-//                $error_message = 'CoinPayments Order #' . Tools::getValue('invoice') . ' does not exists';
-//                throw new Exception($error_message);
-//            }
+            if (!$api->checkDataSignature($signature, $content)) {
+                $error_message = 'CoinPayments Order #' . Tools::getValue('invoice') . ' does not exists';
+                throw new Exception($error_message);
+            }
 
             $invoice_str = $request_data['invoice']['invoiceId'];
             $invoice_str = explode('|', $invoice_str);
