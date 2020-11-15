@@ -101,7 +101,7 @@ class CoinpaymentsNotificationModuleFrontController extends ModuleFrontControlle
                 'text' => get_class($e) . ': IPN Error: ' . $e->getMessage()
             ));
         }
-        $this->setTemplate('module:coinpayments/views/templates/front/payment_callback.tpl');
+        $this->setTemplate('module:coinpayments/views/templates/front/notification.tpl');
     }
 
 }
