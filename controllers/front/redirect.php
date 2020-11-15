@@ -59,7 +59,7 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
         $api = $this->module->initCoinApi();
 
 
-        $payment_url = sprintf('%s/%s/', Coin_Api::API_URL, Coin_Api::API_CHECKOUT_ACTION);
+        $payment_url = sprintf('%s/%s/', Coin_Api::CHECKOUT_URL, Coin_Api::API_CHECKOUT_ACTION);
         $cancel_url = $this->context->link->getModuleLink('coinpayments', 'cancel');
 
         $link = new Link();
