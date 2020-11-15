@@ -148,11 +148,12 @@ class Coin_Api implements Coin_Api_ResourceInterface
         $invoice = false;
         if ($this->useWebhooks()) {
             $invoice = $this->createMerchantInvoice($invoice_id, $currency_id, $amount, $display_value);
+            $invoice = array_shift($invoice['invoices']);
         } else {
             $invoice = $this->createSimpleInvoice($invoice_id, $currency_id, $amount, $display_value);
         }
 
-        return json_decode($invoice->getData(), true);
+        return $invoice;
     }
 
     /**

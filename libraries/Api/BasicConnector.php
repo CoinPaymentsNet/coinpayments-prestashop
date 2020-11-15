@@ -169,6 +169,7 @@ class Coin_Api_BasicConnector implements Coin_Api_ConnectorInterface
                     401
                 );
             case 200:
+            case 201:
                 // Update Data on resource
                 $json = json_decode($result->getData(), true);
                 if ($json === null) {
