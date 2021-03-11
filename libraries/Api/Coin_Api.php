@@ -21,6 +21,9 @@ class Coin_Api implements Coin_Api_ResourceInterface
     const API_CHECKOUT_ACTION = 'checkout';
     const FIAT_TYPE = 'fiat';
 
+    const PAID_EVENT = 'Paid';
+    const CANCELLED_EVENT = 'Cancelled';
+
     /**
      * Connector.
      *
@@ -112,10 +115,10 @@ class Coin_Api implements Coin_Api_ResourceInterface
                     return $webHook['notificationsUrl'];
                 }, $webhooks_list['items']);
             }
-            if (in_array($this->getNotificationUrl(), $webhooks_urls_list)) {
+            if (in_array($this->getNotificationUrl(self::PAID_EVENT), $webhooks_urls_list) && in_array($this->getNotificationUrl(self::CANCELLED_EVENT), $webhooks_urls_list)) {
                 $exists = true;
             } else {
-                if (!empty($webhooks = $this->createWebhook())) {
+                if (!empty($webhooks = $this->createWebhook(self::PAID_EVENT)) && !empty($webhooks = $this->createWebhook(self::CANCELLED_EVENT))) {
                     $exists = true;
                 }
             }
@@ -224,19 +227,15 @@ class Coin_Api implements Coin_Api_ResourceInterface
      * @return bool|mixed
      * @throws Exception
      */
-    public function createWebHook()
+    public function createWebHook($event)
     {
 
         $action = sprintf(self::API_WEBHOOK_ACTION, $this->client_id);
 
         $params = array(
-            "notificationsUrl" => $this->getNotificationUrl(),
+            "notificationsUrl" => $this->getNotificationUrl($event),
             "notifications" => [
-                "invoiceCreated",
-                "invoicePending",
-                "invoicePaid",
-                "invoiceCompleted",
-                "invoiceCancelled",
+                sprintf("invoice%s", $event)
             ],
         );
 
@@ -280,9 +279,9 @@ class Coin_Api implements Coin_Api_ResourceInterface
      * @param $content
      * @return bool
      */
-    public function checkDataSignature($signature, $content)
+    public function checkDataSignature($signature, $content, $event)
     {
-        $request_url = $this->getNotificationUrl();
+        $request_url = $this->getNotificationUrl($event);
         $signature_string = sprintf('%s%s', $request_url, $content);
         $digester = new Coin_Api_Digest($this->client_id, $this->client_secret);
         $encoded_pure = $digester->create($signature_string);
@@ -306,9 +305,9 @@ class Coin_Api implements Coin_Api_ResourceInterface
     /**
      * @return string
      */
-    protected function getNotificationUrl()
+    protected function getNotificationUrl($event)
     {
-        return $this->context->link->getModuleLink('coinpayments', 'notification');
+        return sprintf('%s?clientId=%s&event=%s', $this->context->link->getModuleLink('coinpayments', 'notification'), $this->client_id, $event);
     }
 
     /**
