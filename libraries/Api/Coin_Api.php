@@ -136,78 +136,100 @@ class Coin_Api implements Coin_Api_ResourceInterface
     }
 
     /**
-     * @param $invoice_id
-     * @param $currency_id
-     * @param $amount
-     * @param $display_value
+     * @param $invoice_params
      * @return mixed
      * @throws Exception
      */
-    public function createInvoice($invoice_id, $currency_id, $amount, $display_value)
+    public function createInvoice($invoice_params)
     {
 
         $invoice = false;
         if ($this->useWebhooks()) {
-            $invoice = $this->createMerchantInvoice($invoice_id, $currency_id, $amount, $display_value);
+            $invoice = $this->createMerchantInvoice($invoice_params);
             $invoice = array_shift($invoice['invoices']);
         } else {
-            $invoice = $this->createSimpleInvoice($invoice_id, $currency_id, $amount, $display_value);
+            $invoice = $this->createSimpleInvoice($invoice_params);
         }
 
         return $invoice;
     }
 
     /**
-     * @param int $currency_id
-     * @param string $invoice_id
-     * @param int $amount
-     * @param string $display_value
+     * @param $invoice_params
      * @return bool|mixed
      * @throws Exception
      */
-    public function createSimpleInvoice($invoice_id = 'Validate invoice', $currency_id = 5057, $amount = 1, $display_value = '0.01')
+    public function createSimpleInvoice($invoice_params)
     {
 
         $action = self::API_SIMPLE_INVOICE_ACTION;
 
         $params = array(
             'clientId' => $this->client_id,
-            'invoiceId' => $invoice_id,
+            'invoiceId' => $invoice_params['invoice_id'],
             'amount' => [
-                'currencyId' => $currency_id,
-                "displayValue" => $display_value,
-                'value' => $amount
+                'currencyId' => $invoice_params['currency_id'],
+                "displayValue" => $invoice_params['display_value'],
+                'value' => $invoice_params['amount']
             ],
         );
 
         $params = $this->appendInvoiceMetadata($params);
+        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
         return $this->connector->apply('POST', $action, $params);
     }
 
     /**
-     * @param $currency_id
-     * @param $invoice_id
-     * @param $amount
-     * @param $display_value
+     * @param $invoice_params
      * @return bool|mixed
      * @throws Exception
      */
-    public function createMerchantInvoice($invoice_id, $currency_id, $amount, $display_value)
+    public function createMerchantInvoice($invoice_params)
     {
 
         $action = self::API_MERCHANT_INVOICE_ACTION;
 
         $params = array(
-            "invoiceId" => $invoice_id,
+            "invoiceId" => $invoice_params['invoice_id'],
             "amount" => [
-                "currencyId" => $currency_id,
-                "displayValue" => $display_value,
-                "value" => $amount
+                "currencyId" => $invoice_params['currency_id'],
+                "displayValue" => $invoice_params['display_value'],
+                "value" => $invoice_params['amount']
             ],
         );
 
         $params = $this->appendInvoiceMetadata($params);
+        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
         return $this->connector->apply('POST', $action, $params, true);
+    }
+
+    /**
+     * @param $billing_data
+     * @return array
+     */
+    function append_billing_data($request_data, $billing_data)
+    {
+        $request_data['buyer'] = array(
+            "companyName" => $billing_data['companyname'],
+            "name" => array(
+                "firstName" => $billing_data['firstname'],
+                "lastName" => $billing_data['lastname']
+            ),
+            "emailAddress" => $billing_data['email']
+        );
+        if (preg_match('/^([A-Z]{2})$/', $billing_data['country'])
+            && !empty($billing_data['address1'])
+            && !empty($billing_data['city'])
+        ) {
+            $request_data['buyer']['address'] = array(
+                'address1' => $billing_data['address1'],
+                'provinceOrState' => $billing_data['state'],
+                'city' => $billing_data['city'],
+                'countryCode' => $billing_data['country'],
+                'postalCode' => $billing_data['postcode'],
+            );
+        }
+        return $request_data;
     }
 
     /**
