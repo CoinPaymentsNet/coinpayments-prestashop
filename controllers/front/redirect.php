@@ -74,7 +74,31 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
         try {
             $coin_currency = $api->getCoinCurrency($currency->iso_code);
             $amount = intval(number_format($total, $coin_currency['decimalPlaces'], '', ''));
-            $invoice = $api->createInvoice($invoice_id, $coin_currency['id'], $amount, $total);
+
+            foreach ($cart->getAddressCollection() as $address) {
+                $address1 = $address->address1;
+                $postcode = $address->postcode;
+                $city = $address->city;
+            }
+            $billing_data = array(
+                'companyname' => $customer->company,
+                'firstname' => $customer->firstname,
+                'lastname' => $customer->lastname,
+                'email' => $customer->email,
+                'address1' => $address1,
+                'city' => $city,
+                'country' => $this->context->country->iso_code,
+                'postcode' => $postcode,
+            );
+            $invoice_params = array(
+                'invoice_id' => $invoice_id,
+                'currency_id' => $coin_currency['id'],
+                'amount' => $amount,
+                'display_value' => $total,
+                'billing_data' => $billing_data,
+            );
+
+            $invoice = $api->createInvoice($invoice_params);
 
         } catch (Exception $e) {
             $error = $e;
