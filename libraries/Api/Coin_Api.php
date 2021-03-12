@@ -159,7 +159,12 @@ class Coin_Api implements Coin_Api_ResourceInterface
      * @return bool|mixed
      * @throws Exception
      */
-    public function createSimpleInvoice($invoice_params)
+    public function createSimpleInvoice($invoice_params=array(
+        'invoice_id' => 'Validate invoice',
+        'currency_id' => 5057,
+        'amount' => 1,
+        'display_value' => '0.01'
+    ))
     {
 
         $action = self::API_SIMPLE_INVOICE_ACTION;
