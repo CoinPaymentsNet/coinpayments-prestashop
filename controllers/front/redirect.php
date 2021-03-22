@@ -90,12 +90,16 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
                 'country' => $this->context->country->iso_code,
                 'postcode' => $postcode,
             );
+            $position = strripos(Configuration::get('admin_link'), "orders")+6;
+            $admin_link = Configuration::get('admin_link');
+            $admin_link = substr($admin_link, 0, $position). "/" . $cart->id . '/view' . substr($admin_link, $position + 1);
             $invoice_params = array(
                 'invoice_id' => $invoice_id,
                 'currency_id' => $coin_currency['id'],
                 'amount' => $amount,
                 'display_value' => $total,
                 'billing_data' => $billing_data,
+                'notes_link' => sprintf("%s|Store name: %s|Order #%s", substr($this->context->shop->getBaseURL(true, true), 0, -1) . $admin_link, Configuration::get('PS_SHOP_NAME'), $cart->id)
             );
 
             $invoice = $api->createInvoice($invoice_params);
