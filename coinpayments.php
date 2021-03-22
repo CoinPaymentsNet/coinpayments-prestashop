@@ -192,10 +192,14 @@ class Coinpayments extends PaymentModule
         $logo = Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/logo.png');
         $logoHtml = "<img src='" . $logo . "' height='100' style='margin: 0px' title='CoinPayments.net' />";
 
+        $coinpayments_link = '<a href="https://alpha.coinpayments.net/" target="_blank" title="CoinPayments.net">CoinPayments.net</a>';
+        $coin_description = 'Pay with Bitcoin, Litecoin, or other altcoins via ';
+        $description = sprintf('%s<br/>%s<br/>%s<br/>', $logoHtml, $coin_description, $coinpayments_link);
+
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
         $newOption->setCallToActionText('Bitcoin or other cryptocurrencies')
             ->setAction($this->context->link->getModuleLink($this->name, 'redirect', array(), true))
-            ->setAdditionalInformation($logoHtml);
+            ->setAdditionalInformation($description);
 
         $payment_options = array($newOption);
 

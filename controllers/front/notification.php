@@ -50,7 +50,7 @@ class CoinpaymentsNotificationModuleFrontController extends ModuleFrontControlle
 
             $api = $this->module->initCoinApi();
 
-            if (!$api->checkDataSignature($signature, $content)) {
+            if (!$api->checkDataSignature($signature, $content, $request_data['invoice']['status'])) {
                 $error_message = 'CoinPayments Order #' . Tools::getValue('invoice') . ' does not exists';
                 throw new Exception($error_message);
             }
@@ -76,9 +76,9 @@ class CoinpaymentsNotificationModuleFrontController extends ModuleFrontControlle
 
             $status = $request_data['invoice']['status'];
 
-            if ($status == 'Completed') {
+            if ($status == Coin_Api::PAID_EVENT) {
                 $order_status = 'PS_OS_PAYMENT';
-            } else if ($status == 'Cancelled') {
+            } else if ($status == Coin_Api::CANCELLED_EVENT) {
                 $order_status = 'coinpayments_expired';
             } else {
                 $order_status = 'coinpayments_pending';
