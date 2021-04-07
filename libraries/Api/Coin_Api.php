@@ -166,7 +166,8 @@ class Coin_Api implements Coin_Api_ResourceInterface
         'invoice_id' => 'Validate invoice',
         'currency_id' => 5057,
         'amount' => 1,
-        'display_value' => '0.01'
+        'display_value' => '0.01',
+        'notes_link' => 'Validate invoice'
     ))
     {
 
@@ -184,7 +185,9 @@ class Coin_Api implements Coin_Api_ResourceInterface
         );
 
         $params = $this->appendInvoiceMetadata($params);
-        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
+        if(isset($invoice_params['billing_data'])){
+            $params = $this->append_billing_data($params, $invoice_params['billing_data']);
+        }
         return $this->connector->apply('POST', $action, $params);
     }
 
@@ -225,8 +228,13 @@ class Coin_Api implements Coin_Api_ResourceInterface
                 "firstName" => $billing_data['firstname'],
                 "lastName" => $billing_data['lastname']
             ),
-            "emailAddress" => $billing_data['email']
         );
+
+
+        if (preg_match('/^.*@.*$/', $billing_data['email'])) {
+            $request_params['buyer']['emailAddress'] = $billing_data['email'];
+        }
+
         if (preg_match('/^([A-Z]{2})$/', $billing_data['country'])
             && !empty($billing_data['address1'])
             && !empty($billing_data['city'])
