@@ -62,10 +62,10 @@ class Coin_Api_BasicConnector implements Coin_Api_ConnectorInterface
      * @throws Coin_Api_ConnectorException
      */
     public function apply(
-        string $method,
-        string $action,
-        array $params = null,
-        bool $authorized = false
+        $method,
+        $action,
+        $params = null,
+        $authorized = false
     )
     {
         switch ($method) {
@@ -198,9 +198,9 @@ class Coin_Api_BasicConnector implements Coin_Api_ConnectorInterface
      */
     protected function handle(
         $method,
-        string $action,
-        array $params = null,
-        bool $authorized = false
+        $action,
+        $params = null,
+        $authorized = false
     )
     {
 
@@ -220,7 +220,7 @@ class Coin_Api_BasicConnector implements Coin_Api_ConnectorInterface
      * Get the url to use.
      * @return string Url to use for HTTP requests
      */
-    protected function getApiUrl(string $action)
+    protected function getApiUrl($action)
     {
         return sprintf('%s/api/v%s/%s', Coin_Api::API_URL, Coin_Api::API_VERSION, $action);
     }
