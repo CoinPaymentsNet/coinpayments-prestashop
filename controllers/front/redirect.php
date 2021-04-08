@@ -79,6 +79,8 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
                 $address1 = $address->address1;
                 $postcode = $address->postcode;
                 $city = $address->city;
+                $state = (new State($address->id_state))->name;
+                $country = (new Country($address->id_country))->name[$this->context->language->id];
             }
             $billing_data = array(
                 'companyname' => $customer->company,
@@ -87,12 +89,13 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
                 'email' => $customer->email,
                 'address1' => $address1,
                 'city' => $city,
-                'country' => $this->context->country->iso_code,
+                'country' => $country,
                 'postcode' => $postcode,
+                'state' => $state,
             );
-            $position = strripos(Configuration::get('admin_link'), "orders")+6;
+            $position = strripos(Configuration::get('admin_link'), "orders") + 6;
             $admin_link = Configuration::get('admin_link');
-            $admin_link = substr($admin_link, 0, $position). "/" . $cart->id . '/view' . substr($admin_link, $position + 1);
+            $admin_link = substr($admin_link, 0, $position) . "/" . $cart->id . '/view' . substr($admin_link, $position + 1);
             $invoice_params = array(
                 'invoice_id' => $invoice_id,
                 'currency_id' => $coin_currency['id'],
