@@ -24,10 +24,10 @@ interface Coin_Api_ConnectorInterface
      * @param bool $authorized
      */
     public function apply(
-        string $method,
-        string $action,
-        array $options = null,
-        bool $authorized = false
+        $method,
+        $action,
+        $options = null,
+        $authorized = false
     );
 
 }

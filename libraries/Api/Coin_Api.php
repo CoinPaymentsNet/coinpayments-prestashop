@@ -21,6 +21,9 @@ class Coin_Api implements Coin_Api_ResourceInterface
     const API_CHECKOUT_ACTION = 'checkout';
     const FIAT_TYPE = 'fiat';
 
+    const PAID_EVENT = 'Paid';
+    const CANCELLED_EVENT = 'Cancelled';
+
     /**
      * Connector.
      *
@@ -112,10 +115,10 @@ class Coin_Api implements Coin_Api_ResourceInterface
                     return $webHook['notificationsUrl'];
                 }, $webhooks_list['items']);
             }
-            if (in_array($this->getNotificationUrl(), $webhooks_urls_list)) {
+            if (in_array($this->getNotificationUrl(self::PAID_EVENT), $webhooks_urls_list) && in_array($this->getNotificationUrl(self::CANCELLED_EVENT), $webhooks_urls_list)) {
                 $exists = true;
             } else {
-                if (!empty($webhooks = $this->createWebhook())) {
+                if (!empty($webhooks = $this->createWebhook(self::PAID_EVENT)) && !empty($webhooks = $this->createWebhook(self::CANCELLED_EVENT))) {
                     $exists = true;
                 }
             }
@@ -136,78 +139,115 @@ class Coin_Api implements Coin_Api_ResourceInterface
     }
 
     /**
-     * @param $invoice_id
-     * @param $currency_id
-     * @param $amount
-     * @param $display_value
+     * @param $invoice_params
      * @return mixed
      * @throws Exception
      */
-    public function createInvoice($invoice_id, $currency_id, $amount, $display_value)
+    public function createInvoice($invoice_params)
     {
 
         $invoice = false;
         if ($this->useWebhooks()) {
-            $invoice = $this->createMerchantInvoice($invoice_id, $currency_id, $amount, $display_value);
+            $invoice = $this->createMerchantInvoice($invoice_params);
             $invoice = array_shift($invoice['invoices']);
         } else {
-            $invoice = $this->createSimpleInvoice($invoice_id, $currency_id, $amount, $display_value);
+            $invoice = $this->createSimpleInvoice($invoice_params);
         }
 
         return $invoice;
     }
 
     /**
-     * @param int $currency_id
-     * @param string $invoice_id
-     * @param int $amount
-     * @param string $display_value
+     * @param $invoice_params
      * @return bool|mixed
      * @throws Exception
      */
-    public function createSimpleInvoice($invoice_id = 'Validate invoice', $currency_id = 5057, $amount = 1, $display_value = '0.01')
+    public function createSimpleInvoice($invoice_params=array(
+        'invoice_id' => 'Validate invoice',
+        'currency_id' => 5057,
+        'amount' => 1,
+        'display_value' => '0.01',
+        'notes_link' => 'Validate invoice'
+    ))
     {
 
         $action = self::API_SIMPLE_INVOICE_ACTION;
 
         $params = array(
             'clientId' => $this->client_id,
-            'invoiceId' => $invoice_id,
+            'invoiceId' => $invoice_params['invoice_id'],
             'amount' => [
-                'currencyId' => $currency_id,
-                "displayValue" => $display_value,
-                'value' => $amount
+                'currencyId' => $invoice_params['currency_id'],
+                "displayValue" => $invoice_params['display_value'],
+                'value' => $invoice_params['amount']
             ],
+            'notesToRecipient' => $invoice_params['notes_link'],
         );
 
         $params = $this->appendInvoiceMetadata($params);
+        if(isset($invoice_params['billing_data'])){
+            $params = $this->append_billing_data($params, $invoice_params['billing_data']);
+        }
         return $this->connector->apply('POST', $action, $params);
     }
 
     /**
-     * @param $currency_id
-     * @param $invoice_id
-     * @param $amount
-     * @param $display_value
+     * @param $invoice_params
      * @return bool|mixed
      * @throws Exception
      */
-    public function createMerchantInvoice($invoice_id, $currency_id, $amount, $display_value)
+    public function createMerchantInvoice($invoice_params)
     {
 
         $action = self::API_MERCHANT_INVOICE_ACTION;
 
         $params = array(
-            "invoiceId" => $invoice_id,
+            "invoiceId" => $invoice_params['invoice_id'],
             "amount" => [
-                "currencyId" => $currency_id,
-                "displayValue" => $display_value,
-                "value" => $amount
+                "currencyId" => $invoice_params['currency_id'],
+                "displayValue" => $invoice_params['display_value'],
+                "value" => $invoice_params['amount']
             ],
+            'notesToRecipient' => $invoice_params['notes_link'],
         );
 
         $params = $this->appendInvoiceMetadata($params);
+        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
         return $this->connector->apply('POST', $action, $params, true);
+    }
+
+    /**
+     * @param $billing_data
+     * @return array
+     */
+    function append_billing_data($request_data, $billing_data)
+    {
+        $request_data['buyer'] = array(
+            "companyName" => $billing_data['companyname'],
+            "name" => array(
+                "firstName" => $billing_data['firstname'],
+                "lastName" => $billing_data['lastname']
+            ),
+        );
+
+
+        if (preg_match('/^.*@.*$/', $billing_data['email'])) {
+            $request_params['buyer']['emailAddress'] = $billing_data['email'];
+        }
+
+        if (preg_match('/^([A-Z]{2})$/', $billing_data['country'])
+            && !empty($billing_data['address1'])
+            && !empty($billing_data['city'])
+        ) {
+            $request_data['buyer']['address'] = array(
+                'address1' => $billing_data['address1'],
+                'provinceOrState' => $billing_data['state'],
+                'city' => $billing_data['city'],
+                'countryCode' => $billing_data['country'],
+                'postalCode' => $billing_data['postcode'],
+            );
+        }
+        return $request_data;
     }
 
     /**
@@ -224,19 +264,15 @@ class Coin_Api implements Coin_Api_ResourceInterface
      * @return bool|mixed
      * @throws Exception
      */
-    public function createWebHook()
+    public function createWebHook($event)
     {
 
         $action = sprintf(self::API_WEBHOOK_ACTION, $this->client_id);
 
         $params = array(
-            "notificationsUrl" => $this->getNotificationUrl(),
+            "notificationsUrl" => $this->getNotificationUrl($event),
             "notifications" => [
-                "invoiceCreated",
-                "invoicePending",
-                "invoicePaid",
-                "invoiceCompleted",
-                "invoiceCancelled",
+                sprintf("invoice%s", $event)
             ],
         );
 
@@ -280,9 +316,9 @@ class Coin_Api implements Coin_Api_ResourceInterface
      * @param $content
      * @return bool
      */
-    public function checkDataSignature($signature, $content)
+    public function checkDataSignature($signature, $content, $event)
     {
-        $request_url = $this->getNotificationUrl();
+        $request_url = $this->getNotificationUrl($event);
         $signature_string = sprintf('%s%s', $request_url, $content);
         $digester = new Coin_Api_Digest($this->client_id, $this->client_secret);
         $encoded_pure = $digester->create($signature_string);
@@ -306,9 +342,9 @@ class Coin_Api implements Coin_Api_ResourceInterface
     /**
      * @return string
      */
-    protected function getNotificationUrl()
+    protected function getNotificationUrl($event)
     {
-        return $this->context->link->getModuleLink('coinpayments', 'notification');
+        return sprintf('%s?clientId=%s&event=%s', $this->context->link->getModuleLink('coinpayments', 'notification'), $this->client_id, $event);
     }
 
     /**

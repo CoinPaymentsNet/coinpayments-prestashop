@@ -47,6 +47,8 @@ class Coinpayments extends PaymentModule
     public $webhooks;
     public $client_secret;
 
+    private $admin_link;
+
     public function __construct()
     {
         $this->name = 'coinpayments';
@@ -67,6 +69,7 @@ class Coinpayments extends PaymentModule
                 'coinpayments_client_id',
                 'coinpayments_webhooks',
                 'coinpayments_client_secret',
+                'admin_link'
             )
         );
 
@@ -78,6 +81,9 @@ class Coinpayments extends PaymentModule
         }
         if (!empty($config['coinpayments_client_secret'])) {
             $this->client_secret = $config['coinpayments_client_secret'];
+        }
+        if (!empty($config['admin_link'])) {
+            $this->admin_link = $config['admin_link'];
         }
 
         parent::__construct();
@@ -186,10 +192,14 @@ class Coinpayments extends PaymentModule
         $logo = Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/logo.png');
         $logoHtml = "<img src='" . $logo . "' height='100' style='margin: 0px' title='CoinPayments.net' />";
 
+        $coinpayments_link = '<a href="https://alpha.coinpayments.net/" target="_blank" title="CoinPayments.net">CoinPayments.net</a>';
+        $coin_description = 'Pay with Bitcoin, Litecoin, or other altcoins via ';
+        $description = sprintf('%s<br/>%s<br/>%s<br/>', $logoHtml, $coin_description, $coinpayments_link);
+
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
         $newOption->setCallToActionText('Bitcoin or other cryptocurrencies')
             ->setAction($this->context->link->getModuleLink($this->name, 'redirect', array(), true))
-            ->setAdditionalInformation($logoHtml);
+            ->setAdditionalInformation($description);
 
         $payment_options = array($newOption);
 
@@ -302,6 +312,10 @@ class Coinpayments extends PaymentModule
                 'coinpayments_client_secret',
                 Configuration::get('coinpayments_client_secret')
             ),
+            'admin_link' => Tools::getValue(
+                'admin_link',
+                Configuration::get('admin_link')
+            ),
         );
     }
 
@@ -370,6 +384,7 @@ class Coinpayments extends PaymentModule
             Configuration::updateValue('coinpayments_client_id', trim(Tools::getValue('coinpayments_client_id')));
             Configuration::updateValue('coinpayments_webhooks', trim(Tools::getValue('coinpayments_webhooks')));
             Configuration::updateValue('coinpayments_client_secret', trim(Tools::getValue('coinpayments_client_secret')));
+            Configuration::set('admin_link', $this->context->link->getAdminLink('AdminOrders'));
         }
 
         $this->html .= $this->displayConfirmation($this->l('Settings updated'));

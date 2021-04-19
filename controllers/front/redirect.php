@@ -74,7 +74,38 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
         try {
             $coin_currency = $api->getCoinCurrency($currency->iso_code);
             $amount = intval(number_format($total, $coin_currency['decimalPlaces'], '', ''));
-            $invoice = $api->createInvoice($invoice_id, $coin_currency['id'], $amount, $total);
+
+            foreach ($cart->getAddressCollection() as $address) {
+                $address1 = $address->address1;
+                $postcode = $address->postcode;
+                $city = $address->city;
+                $state = (new State($address->id_state))->name;
+                $country = (new Country($address->id_country))->name[$this->context->language->id];
+            }
+            $billing_data = array(
+                'companyname' => $customer->company,
+                'firstname' => $customer->firstname,
+                'lastname' => $customer->lastname,
+                'email' => $customer->email,
+                'address1' => $address1,
+                'city' => $city,
+                'country' => $country,
+                'postcode' => $postcode,
+                'state' => $state,
+            );
+            $position = strripos(Configuration::get('admin_link'), "orders") + 6;
+            $admin_link = Configuration::get('admin_link');
+            $admin_link = substr($admin_link, 0, $position) . "/" . $cart->id . '/view' . substr($admin_link, $position + 1);
+            $invoice_params = array(
+                'invoice_id' => $invoice_id,
+                'currency_id' => $coin_currency['id'],
+                'amount' => $amount,
+                'display_value' => $total,
+                'billing_data' => $billing_data,
+                'notes_link' => sprintf("%s|Store name: %s|Order #%s", substr($this->context->shop->getBaseURL(true, true), 0, -1) . $admin_link, Configuration::get('PS_SHOP_NAME'), $cart->id)
+            );
+
+            $invoice = $api->createInvoice($invoice_params);
 
         } catch (Exception $e) {
             $error = $e;
