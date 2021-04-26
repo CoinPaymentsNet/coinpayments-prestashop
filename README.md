@@ -8,27 +8,6 @@ Demonstration Website Disclaimer:   The information presented on alpha.coinpayme
 
 In no event will CoinPayments Inc. or its directors, officers, employees, shareholders, service providers or agents, be liable to you, or anyone else, for any decision(s) made or action(s) taken in reliance upon the information contained in the Demo Site, nor for any direct, indirect, incidental, special, exemplary, punitive, consequential, or other damages whatsoever (including, but not limited to, liability for loss of use, funds, data or profits) whether in an action of contract, statute, tort or otherwise, relating to the use of the Demo Site.
 
-#CoinPayments-PrestaShop
-
-Installation:
-=============
-  Using git:
-  - Clone repo using command for project root
-  
-    `git clone https://github.com/CoinPaymentsNet/coinpayments-prestashop.git modules/coinpayments`
-   
-  Manual:
-  - Extract the files in your coinpayments module archive to modules/coinpayments folder.
-
-    
-  Administrator interface:
-  - Go to Module manager aria and press "Upload a module"
-  
-  After:
-  - On Module manager page select coinpayments module, install and configure as required.
-
-This module is safe to use on a production site.
-
 # Follow the steps below to download this plugin:
   
 1. Log into your https://alpha.coinpayments.net/ account
