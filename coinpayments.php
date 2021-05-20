@@ -384,7 +384,7 @@ class Coinpayments extends PaymentModule
             Configuration::updateValue('coinpayments_client_id', trim(Tools::getValue('coinpayments_client_id')));
             Configuration::updateValue('coinpayments_webhooks', trim(Tools::getValue('coinpayments_webhooks')));
             Configuration::updateValue('coinpayments_client_secret', trim(Tools::getValue('coinpayments_client_secret')));
-            Configuration::set('admin_link', $this->context->link->getAdminLink('AdminOrders'));
+            Configuration::updateValue('admin_link', $this->context->link->getAdminLink('AdminOrders'));
         }
 
         $this->html .= $this->displayConfirmation($this->l('Settings updated'));
