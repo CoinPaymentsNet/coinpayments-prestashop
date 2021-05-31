@@ -117,15 +117,15 @@ class Coinpayments extends PaymentModule
 
         if ($order_pending->add()) {
             copy(
-                _PS_ROOT_DIR_ . '/modules/coinpayments/logo.png',
-                _PS_ROOT_DIR_ . '/img/os/' . (int)$order_pending->id . '.png'
+                _PS_ROOT_DIR_ . '/modules/coinpayments/logo.svg',
+                _PS_ROOT_DIR_ . '/img/os/' . (int)$order_pending->id . '.svg'
             );
         }
 
         if ($order_expired->add()) {
             copy(
-                _PS_ROOT_DIR_ . '/modules/coinpayments/logo.png',
-                _PS_ROOT_DIR_ . '/img/os/' . (int)$order_expired->id . '.png'
+                _PS_ROOT_DIR_ . '/modules/coinpayments/logo.svg',
+                _PS_ROOT_DIR_ . '/img/os/' . (int)$order_expired->id . '.svg'
             );
         }
 
@@ -189,7 +189,7 @@ class Coinpayments extends PaymentModule
             return;
         }
 
-        $logo = Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/logo.png');
+        $logo = Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/logo.svg');
         $logoHtml = "<img src='" . $logo . "' height='100' style='margin: 0px' title='CoinPayments.net' />";
 
         $coinpayments_link = '<a href="https://alpha.coinpayments.net/" target="_blank" title="CoinPayments.net">CoinPayments.net</a>';
