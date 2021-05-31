@@ -197,7 +197,7 @@ class Coinpayments extends PaymentModule
         $description = sprintf('%s<br/>%s<br/>%s<br/>', $logoHtml, $coin_description, $coinpayments_link);
 
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
-        $newOption->setCallToActionText('Bitcoin or other cryptocurrencies')
+        $newOption->setCallToActionText('Bitcoin or other cryptocurrencies with CoinPayments.net')
             ->setAction($this->context->link->getModuleLink($this->name, 'redirect', array(), true))
             ->setAdditionalInformation($description);
 
