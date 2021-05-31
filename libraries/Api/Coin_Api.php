@@ -181,6 +181,7 @@ class Coin_Api implements Coin_Api_ResourceInterface
                 "displayValue" => $invoice_params['display_value'],
                 'value' => $invoice_params['amount']
             ],
+            'requireBuyerNameAndEmail' => true,
             'notesToRecipient' => $invoice_params['notes_link'],
         );
 
@@ -208,6 +209,7 @@ class Coin_Api implements Coin_Api_ResourceInterface
                 "displayValue" => $invoice_params['display_value'],
                 "value" => $invoice_params['amount']
             ],
+            'requireBuyerNameAndEmail' => true,
             'notesToRecipient' => $invoice_params['notes_link'],
         );
 
@@ -232,7 +234,7 @@ class Coin_Api implements Coin_Api_ResourceInterface
 
 
         if (preg_match('/^.*@.*$/', $billing_data['email'])) {
-            $request_params['buyer']['emailAddress'] = $billing_data['email'];
+            $request_data['buyer']['emailAddress'] = $billing_data['email'];
         }
 
         if (preg_match('/^([A-Z]{2})$/', $billing_data['country'])
