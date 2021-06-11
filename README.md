@@ -15,4 +15,5 @@ In no event will CoinPayments Inc. or its directors, officers, employees, shareh
 3. Select this plug-in from the dropdown menu
 4. Click the download plugin button  
    
-![Screenshot 2021-04-26 042111](https://user-images.githubusercontent.com/72504315/116074679-ee3f9d00-a646-11eb-8794-6fefd04d252f.png)
+![Screenshot 2021-06-11 045645](https://user-images.githubusercontent.com/72504315/121682861-76e89000-ca71-11eb-8199-bf04b84b25de.png)
+
