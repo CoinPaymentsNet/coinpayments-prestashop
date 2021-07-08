@@ -109,7 +109,8 @@ class CoinpaymentsRedirectModuleFrontController extends ModuleFrontController
             $invoice = $api->createInvoice($invoice_params);
 
         } catch (Exception $e) {
-            $error = $e;
+            $this->errors[] = $this->l(sprintf('Can\'t create Coinpayments.NET invoice, please contact to %s', Configuration::get('PS_SHOP_EMAIL')));
+            $this->redirectWithNotifications('index.php?controller=order');
         }
 
         $customer = new Customer($cart->id_customer);
