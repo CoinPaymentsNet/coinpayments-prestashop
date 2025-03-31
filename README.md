@@ -1,3 +1,5 @@
+> NOTICE: Migrated to [CoinPaymentsNet/plugin-prestashop](https://github.com/CoinPaymentsNet/plugin-prestashop).
+
 IMPORTANT NOTE:
 
 This is only for use with: https://alpha.coinpayments.net/
